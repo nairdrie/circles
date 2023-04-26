@@ -6,9 +6,10 @@ import { SignIn, SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import { api } from "~/utils/api";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
 
   const user = useUser();
+
+  const { data } = api.posts.getAll.useQuery();
 
   return (
     <>
@@ -23,13 +24,16 @@ const Home: NextPage = () => {
             Circles <span className="text-[hsl(280,100%,70%)]"></span>
           </h1>
           <div>
-            { user.isSignedIn ? <SignOutButton /> : <SignInButton /> }
+            {
+              data?.map((post) => (
+                <div key={post.id}>
+                  {post.content}
+                </div>
+              ))
+            }
           </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello.data ? hello.data.greeting : "Loading tRPC query..."}
-            </p>
-            {/* <AuthShowcase /> */}
+          <div>
+            { user.isSignedIn ? <SignOutButton /> : <SignInButton /> }
           </div>
         </div>
       </main>
