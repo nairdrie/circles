@@ -5,12 +5,31 @@ import { RouterOutputs, api } from "~/utils/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
-import { LoadingPage } from "~/components/loading";
+import { LoadingPage, LoadingSpinner } from "~/components/loading";
+import React from "react";
+import toast from "react-hot-toast";
 
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const { user } = useUser();
+
+  const [input, setInput] = React.useState("");
+  
+  const ctx = api.useContext();
+
+  const {mutate, isLoading: isPosting} = api.posts.create.useMutation({
+    onSuccess: () => {
+      ctx.posts.getAll.invalidate();
+      setInput("");
+    },
+    onError: (e) => {
+      const errorMessage = e.data?.zodError?.fieldErrors.content;
+      if(errorMessage && errorMessage[0]) toast.error(errorMessage[0]);
+      else toast.error("Something went wrong. Please try again later.");
+      // toast.error("Something went wrong. Please try again later.");
+    }
+  });
 
   if(!user) return null;
 
@@ -23,7 +42,31 @@ const CreatePostWizard = () => {
       height={48}
       // placeholder="blur"  
     />
-    <input placeholder="Say something!" className="grow bg-transparent outline-none"/>
+    <input placeholder="Say something!" className="grow bg-transparent outline-none"
+      type="text"
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      onKeyDown={(e) => {
+        if(e.key === "Enter") {
+          e.preventDefault();
+          mutate({content: input});
+        }
+      }}
+      disabled={isPosting}
+    />
+    {input !== "" && (
+      <button 
+        onClick={() => {
+          mutate({content: input});
+        }} 
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" 
+        disabled={isPosting}
+      >
+        { isPosting && <LoadingSpinner/>}
+        { !isPosting && "Post"}
+      </button>
+    )} 
+
   </div>
 }
 
@@ -61,7 +104,7 @@ const Feed = () => {
 
   return (<div className="flex flex-col">
     {
-      data?.map((fullPost) => (
+      data.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id}/>
       ))
     }
