@@ -35,7 +35,7 @@ const CreatePostWizard = () => {
 
   return <div className="flex gap-3 w-full">
     <Image 
-      alt={`${user.username}'s profile picture`} 
+      alt={`${user.username ? user.username : "Someone"}'s profile picture`} 
       src={user.profileImageUrl} 
       className="w-12 h-12 rounded-full" 
       width={48} 
@@ -76,7 +76,7 @@ const PostView = (props: PostWithUser) => {
   const { post, author } = props;
   return <div key={post.id} className="flex p-4 align-center border-b border-slate-400 gap-3">
     <Image 
-      alt={`${author.username}'s profile picture`} 
+      alt={`${author.username ? author.username : "Someone"}'s profile picture`} 
       src={author.profileImageUrl} 
       className="w-8 h-8 rounded-full" 
       width={32} 
@@ -85,7 +85,7 @@ const PostView = (props: PostWithUser) => {
     />
     <div className="flex flex-col">
       <div className="flex items-center">
-        <span className="">{`@${author.username}`}</span>
+        <span className="">{`@${author.username ? author.username : "Someone"}`}</span>
         <span className="p-2">·</span>
         <span className="font-thin">{`${dayjs(post.createdAt).fromNow()}`}</span>
       </div>
