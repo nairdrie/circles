@@ -1,8 +1,8 @@
-import type { User } from "@clerk/nextjs/dist/api";
 import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { Ratelimit } from "@upstash/ratelimit";
+import type { Post } from "@prisma/client";
 
 import {
   createTRPCRouter,
@@ -10,29 +10,9 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 import { Redis } from "@upstash/redis";
+import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 
-const filterUserForClient = (user: User) => {
-    return {
-        id: user.id,
-        username: user.username,
-        profileImageUrl: user.profileImageUrl
-    }
-}
-
-const ratelimit = new Ratelimit({
-    redis: Redis.fromEnv(),
-    limiter: Ratelimit.slidingWindow(5, "1 m")
-})
-
-export const postsRouter = createTRPCRouter({
-  getAll: publicProcedure.query(async ({ ctx }) => {
-    const posts = await ctx.prisma.post.findMany({
-        take: 100,
-        orderBy: {
-            createdAt: "desc"
-        }
-    });
-
+const addUserDataToPosts = async (posts: Post[]) => {
     const users = (
         await clerkClient.users.getUserList({
             userId: posts.map((post) => post.authorId),
@@ -52,7 +32,43 @@ export const postsRouter = createTRPCRouter({
             author
         };
     });
+}
+
+const ratelimit = new Ratelimit({
+    redis: Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(5, "1 m"),
+})
+
+export const postsRouter = createTRPCRouter({
+
+  getAll: publicProcedure.query(async ({ ctx }) => {
+    const posts = await ctx.prisma.post.findMany({
+        take: 100,
+        orderBy: {
+            createdAt: "desc"
+        }
+    });
+
+    return addUserDataToPosts(posts);
   }),
+
+  getPostsByUserId: publicProcedure
+    .input(
+        z.object({
+            userId: z.string()
+        })
+    )
+    .query( ({ctx, input}) => 
+        ctx.prisma.post.findMany({
+            where: {
+                authorId: input.userId
+            },
+            orderBy: {
+                createdAt: "desc"
+            }
+        }).then(addUserDataToPosts)
+    ),
+
   create: protectedProcedure.input(z.object({
     content: z.string().min(1, "Too short").max(280, "Too long")
   })).mutation(async ({ctx, input}) => {
@@ -76,4 +92,5 @@ export const postsRouter = createTRPCRouter({
     return post;
 
   })
+
 });
