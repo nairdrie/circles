@@ -4,6 +4,8 @@ on: [push, pull_request]
 
 env:
   DATABASE_URL: "https://fake.com"
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "fake"
+  CLERK_SECRET_KEY: "fake"
 
 jobs:
   build:
