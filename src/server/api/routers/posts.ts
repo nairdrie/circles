@@ -13,19 +13,26 @@ import { Redis } from "@upstash/redis";
 import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 
 const addUserDataToPosts = async (posts: Post[]) => {
+    const userId = posts.map((post) => post.authorId);
+
     const users = (
         await clerkClient.users.getUserList({
-            userId: posts.map((post) => post.authorId),
+            userId: userId,
             limit: 100
         })
     ).map(filterUserForClient);
 
     return posts.map((post) => {
         const author = users.find((user) => user.id === post.authorId);
+
         if(!author) throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Author not found"
         });
+
+        if (!author.username) {
+            author.username = "Anonymous";
+          }
 
         return {
             post,

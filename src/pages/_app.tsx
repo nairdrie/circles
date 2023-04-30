@@ -8,9 +8,9 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "react-hot-toast";
 import Head from "next/head";
 
-const MyApp: AppType<{ session: Session | null }> = ({
+const MyApp: AppType = ({
   Component,
-  pageProps: { session, ...pageProps },
+  pageProps
 }) => {
   return (
     <ClerkProvider {...pageProps} >
