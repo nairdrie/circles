@@ -28,7 +28,7 @@ const config = {
     ignoreBuildErrors: true
   },
 
-  esLint: {
+  eslint: {
     ignoreDuringBuilds: true,
   },
 
