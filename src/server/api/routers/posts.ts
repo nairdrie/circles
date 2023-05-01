@@ -30,13 +30,12 @@ const addUserDataToPosts = async (posts: Post[]) => {
             message: "Author not found"
         });
 
-        if (!author.username) {
-            author.username = "Anonymous";
-          }
-
         return {
             post,
-            author
+            author: {
+                ...author,
+                username: author.username || "Anonymous"
+            }
         };
     });
 }

@@ -1,5 +1,4 @@
 import { type AppType } from "next/app";
-import { type Session } from "next-auth";
 
 import { api } from "~/utils/api";
 
