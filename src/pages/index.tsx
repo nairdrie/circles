@@ -37,7 +37,7 @@ const CreatePostWizard = () => {
 
   return <div className="flex gap-3 w-full">
     <Image 
-      alt={`${user.username ? user.username : "Someone"}'s profile picture`} 
+      alt={`${user.username ?? ''}'s profile picture`} 
       src={user.profileImageUrl} 
       className="w-12 h-12 rounded-full" 
       width={48} 

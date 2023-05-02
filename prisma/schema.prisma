@@ -22,6 +22,12 @@ model Post {
     @@index([authorId])
 }
 
+model Follower {
+    id          String   @id @default(cuid())
+    followerId  String
+    followingId String
+}
+
 // Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())

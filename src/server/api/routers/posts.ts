@@ -10,7 +10,7 @@ import {
   protectedProcedure,
 } from "~/server/api/trpc";
 import { Redis } from "@upstash/redis";
-import { filterUserForClient } from "~/server/helpers/filterUserForClient";
+import { getUserCondensed } from "~/server/helpers/filterUserForClient";
 
 const addUserDataToPosts = async (posts: Post[]) => {
     const userId = posts.map((post) => post.authorId);
@@ -20,7 +20,7 @@ const addUserDataToPosts = async (posts: Post[]) => {
             userId: userId,
             limit: 100
         })
-    ).map(filterUserForClient);
+    ).map(getUserCondensed);
 
     return posts.map((post) => {
         const author = users.find((user) => user.id === post.authorId);
